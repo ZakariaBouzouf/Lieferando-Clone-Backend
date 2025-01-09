@@ -5,6 +5,7 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from sqlalchemy import JSON, ForeignKey, inspect
 from sqlalchemy.sql.sqltypes import ARRAY
 from population import mock_data
+from flask_cors import CORS, cross_origin
 import json
 
 # My app
@@ -20,6 +21,9 @@ db = SQLAlchemy(model_class=Base)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///test.db"
 
 db.init_app(app)
+
+cors = CORS(app)  # allow CORS for all domains on all routes.
+app.config["CORS_HEADERS"] = "Content-Type"
 
 
 class Restaurant(Base):
@@ -53,6 +57,13 @@ class Menu(Base):
     restaurant: Mapped["Restaurant"] = relationship(back_populates="menus")
 
 
+def bool_convertion(string):
+    if string == "true":
+        return True
+    else:
+        return False
+
+
 def populate_database(data):
     for restaurant_data in data:
         # Create a Restaurant object
@@ -62,11 +73,11 @@ def populate_database(data):
             image=restaurant_data["image"],
             cuisine=json.dumps(restaurant_data["cuisine"]),
             rating=restaurant_data["rating"],
-            delivery_fee=restaurant_data["deliveryFee"],
-            min_order=restaurant_data["minOrder"],
-            is_open=restaurant_data["isOpen"],
+            deliveryFee=restaurant_data["deliveryFee"],
+            minOrder=restaurant_data["minOrder"],
+            isOpen=bool_convertion(restaurant_data["isOpen"]),
             address=restaurant_data["address"],
-            menu=[],
+            menus=[],
         )
 
         # Add menu items
@@ -77,7 +88,7 @@ def populate_database(data):
                 price=menu_data["price"],
                 category=menu_data["category"],
                 image=menu_data["image"],
-                available=menu_data["available"],
+                available=bool_convertion(menu_data["available"]),
                 restaurant_id=restaurant.id,
             )
             db.session.add(menu_item)
@@ -90,38 +101,38 @@ def populate_database(data):
 with app.app_context():
     db.drop_all()
     db.create_all()
-    # populate_database(mock_data)
-    menu1 = Menu(
-        name="Margherita Pizza",
-        description="Fresh tomatoes, mozzarella, basil",
-        price=14.99,
-        category="Pizza",
-        image="https://images.unsplash.com/photo-1574071318508-1cdbab80d002",
-        restaurant_id=1,
-        available=True,
-    )
-    restau1 = Restaurant(
-        name="Pizza Paradise",
-        description="Authentic Italian pizzas and pasta",
-        image="https://images.unsplash.com/photo-1604382354936-07c5d9983bd3",
-        cuisine=["Italian", "Pizza"],
-        rating=4.5,
-        deliveryFee=0,
-        minOrder=15,
-        isOpen=True,
-        address="123 Main st",
-        menus=[menu1],
-    )
+    populate_database(mock_data)
+    # menu1 = Menu(
+    #     name="Margherita Pizza",
+    #     description="Fresh tomatoes, mozzarella, basil",
+    #     price=14.99,
+    #     category="Pizza",
+    #     image="https://images.unsplash.com/photo-1574071318508-1cdbab80d002",
+    #     restaurant_id=1,
+    #     available=True,
+    # )
+    # restau1 = Restaurant(
+    #     name="Pizza Paradise",
+    #     description="Authentic Italian pizzas and pasta",
+    #     image="https://images.unsplash.com/photo-1604382354936-07c5d9983bd3",
+    #     cuisine=["Italian", "Pizza"],
+    #     rating=4.5,
+    #     deliveryFee=0,
+    #     minOrder=15,
+    #     isOpen=True,
+    #     address="123 Main st",
+    #     menus=[menu1],
+    # )
     # restau1 = Restaurant(name="mcdo", address="marjan")
     # restau2 = Restaurant(name="jambo", address="houria")
     # inspector = inspect(db.engine)
     # columns = inspector.get_columns("restaurant")
     # print(columns)
     # print(f"this is a resto :{restau1}")
-    db.session.add(restau1)
-    db.session.add(menu1)
-    # db.session.add(restau2)
-    db.session.commit()
+    # db.session.add(restau1)
+    # db.session.add(menu1)
+    # # db.session.add(restau2)
+    # db.session.commit()
 
 
 @app.route("/")
