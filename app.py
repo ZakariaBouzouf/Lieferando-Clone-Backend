@@ -1,3 +1,4 @@
+from datetime import date
 from typing import List
 from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
@@ -6,7 +7,10 @@ from sqlalchemy import JSON, ForeignKey, inspect
 from sqlalchemy.sql.sqltypes import ARRAY
 from population import mock_data
 from flask_cors import CORS, cross_origin
-import json
+from .login import login_bp
+from flask_login import LoginManager
+
+# import json
 
 # My app
 app = Flask(__name__)
@@ -24,6 +28,8 @@ db.init_app(app)
 
 cors = CORS(app)  # allow CORS for all domains on all routes.
 app.config["CORS_HEADERS"] = "Content-Type"
+
+app.register_blueprint(login_bp)
 
 
 class Restaurant(Base):
@@ -56,6 +62,30 @@ class Menu(Base):
     available: Mapped[bool]
     restaurant: Mapped["Restaurant"] = relationship(back_populates="menus")
 
+    # def __repr__(self) -> str:
+    #     return f"Name:{self.name}, from restaurant: {self.price}"
+
+
+# class User()
+
+
+# class Order(Base):
+#     __tablename__ = "order"
+#     id: Mapped[int] = mapped_column(primary_key=True)
+#     customer: Mapped[str]
+#     items: Mapped[List["Menu"]]
+#     total: Mapped[float]
+#     status: Mapped[str]
+#     createdAt: Mapped[date]
+
+
+# id: '1',
+# customer: 'John Doe',
+# items: [{ name: 'Pizza', quantity: 2, price: 12.99 }],
+# total: 25.98,
+# status: 'pending',
+# createdAt: new Date().toISOString()
+
 
 def bool_convertion(string):
     if string == "true":
@@ -71,7 +101,7 @@ def populate_database(data):
             name=restaurant_data["name"],
             description=restaurant_data["description"],
             image=restaurant_data["image"],
-            cuisine=json.dumps(restaurant_data["cuisine"]),
+            cuisine=restaurant_data["cuisine"],
             rating=restaurant_data["rating"],
             deliveryFee=restaurant_data["deliveryFee"],
             minOrder=restaurant_data["minOrder"],
@@ -92,6 +122,7 @@ def populate_database(data):
                 restaurant_id=restaurant.id,
             )
             db.session.add(menu_item)
+            restaurant.menus.append(menu_item)
         db.session.add(restaurant)
 
     db.session.commit()
@@ -123,21 +154,24 @@ with app.app_context():
     #     address="123 Main st",
     #     menus=[menu1],
     # )
-    # restau1 = Restaurant(name="mcdo", address="marjan")
-    # restau2 = Restaurant(name="jambo", address="houria")
-    # inspector = inspect(db.engine)
-    # columns = inspector.get_columns("restaurant")
-    # print(columns)
-    # print(f"this is a resto :{restau1}")
+    # # inspector = inspect(db.engine)
+    # # columns = inspector.get_columns("restaurant")
+    # # print(columns)
+    # # print(f"this is a resto :{restau1}")
     # db.session.add(restau1)
     # db.session.add(menu1)
-    # # db.session.add(restau2)
+    # # # db.session.add(restau2)
     # db.session.commit()
 
 
 @app.route("/")
 def index():
     return "Testing 123"
+
+
+# @app.route("/menu/<int:id>")
+# def menu_list(id):
+#     menu = db.get_or_404(Restaurant, id)
 
 
 @app.route("/restaurants")
@@ -157,6 +191,7 @@ def restaurants_list():
                 "minOrder": restaurant.minOrder,
                 "isOpen": restaurant.isOpen,
                 "address": restaurant.address,
+                # "menus": restaurant.menus,
             }
             for restaurant in restaurants
         ]
@@ -181,8 +216,35 @@ def create_restaurant():
 def get_restaurant(id):
     restaurant = db.get_or_404(Restaurant, id)
 
+    if restaurant.menus is not None:
+        menu_list = [
+            {
+                "id": menu.id,
+                "name": menu.name,
+                "description": menu.description,
+                "image": menu.image,
+                "category": menu.category,
+                # "available": menu.available,
+            }
+            for menu in restaurant.menus
+        ]
+    else:
+        menu_list = []
+    print(restaurant.menus)
     rest = [
-        {"id": restaurant.id, "name": restaurant.name, "address": restaurant.address}
+        {
+            "id": restaurant.id,
+            "name": restaurant.name,
+            "description": restaurant.description,
+            "image": restaurant.image,
+            "cuisine": restaurant.cuisine,
+            "rating": restaurant.rating,
+            "deliveryFee": restaurant.deliveryFee,
+            "minOrder": restaurant.minOrder,
+            "isOpen": restaurant.isOpen,
+            "address": restaurant.address,
+            "menus": menu_list,
+        }
     ]
     return jsonify(rest)
 
@@ -194,6 +256,34 @@ def delete_restaurant(id):
     db.session.delete(restaurant)
     db.session.commit()
     return "Delete Done."
+
+
+@app.route("/menu/<int:id>")
+def get_menus(id):
+    restaurant = db.get_or_404(Restaurant, id)
+
+    if restaurant.menus is not None:
+        menu_list = [
+            {
+                "id": menu.id,
+                "name": menu.name,
+                "description": menu.description,
+                "image": menu.image,
+                "category": menu.category,
+                "price": menu.price,
+                # "available": menu.available,
+            }
+            for menu in restaurant.menus
+        ]
+    else:
+        menu_list = []
+
+    return jsonify(menu_list)
+
+
+@app.route("/orders/<int:id>")
+def get_orders(id):
+    return "done"
 
 
 if __name__ in "__main__":
