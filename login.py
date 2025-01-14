@@ -5,8 +5,9 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 # Create a Blueprint for login
 login_bp = Blueprint("login", __name__, url_prefix="/auth")
 
-login_manager = LoginManager() # Add this line
-login_manager.init_app(app)
+# login_manager = LoginManager()  # Add this line
+# login_manager.init_app(app)
+
 
 class Base(DeclarativeBase):
     pass
@@ -20,9 +21,11 @@ class User(Base):
     createdOn: Mapped[Date]
     isRestaurant: Mapped[bool]
 
-@login_bp.route("/register",methods=["POST"])
+
+@login_bp.route("/register", methods=["POST"])
 def register():
-    
+    return "Registration Done"
+
 
 @login_bp.route("/login", methods=["POST"])
 def login():

@@ -1,16 +1,50 @@
-# from sqlalchemy import create_engine
-# from sqlalchemy.orm import sessionmaker
-# from app import (
-#     Restaurant,
-#     Menu,
-# )
-# import json
-#
-# DATABASE_URL = "sqlite:///test.db"
-#
-# engine = create_engine(DATABASE_URL)
-# Session = sessionmaker(bind=engine)
-# session = Session()
+from app.extensions import db
+from app.models.models import Restaurant, Menu
+
+
+def bool_convertion(word):
+    # if type(word)== 'bool':
+    #     if word
+    if word == "true" or word == "True":
+        return True
+    else:
+        return False
+
+
+def populate_database():
+    for restaurant_data in mock_data:
+        # Create a Restaurant object
+        restaurant = Restaurant(
+            name=restaurant_data["name"],
+            description=restaurant_data["description"],
+            image=restaurant_data["image"],
+            cuisine=restaurant_data["cuisine"],
+            rating=restaurant_data["rating"],
+            deliveryFee=restaurant_data["deliveryFee"],
+            minOrder=restaurant_data["minOrder"],
+            isOpen=bool_convertion(restaurant_data["isOpen"]),
+            address=restaurant_data["address"],
+            menus=[],
+        )
+
+        # Add menu items
+        for menu_data in restaurant_data["menu"]:
+            menu_item = Menu(
+                name=menu_data["name"],
+                description=menu_data["description"],
+                price=menu_data["price"],
+                category=menu_data["category"],
+                image=menu_data["image"],
+                available=bool_convertion(menu_data["available"]),
+                restaurant_id=restaurant.id,
+            )
+            db.session.add(menu_item)
+            restaurant.menus.append(menu_item)
+        db.session.add(restaurant)
+
+    db.session.commit()
+    print("Database populated successfully!")
+
 
 mock_data = [
     {
