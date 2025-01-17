@@ -1,17 +1,14 @@
 from flask_login import UserMixin
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
-from sqlalchemy.orm import DeclarativeBase
-from sqlalchemy import JSON, ForeignKey
+from flask_login.login_manager import datetime
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy import JSON, Date, DateTime, ForeignKey
 from typing import List
 from app.extensions import db
-
-
-class Base(DeclarativeBase):
-    pass
+from sqlalchemy_serializer import SerializerMixin
 
 
 class Restaurant(db.Model):
-    __tablename__ = "restaurant"
+    __tablename__ = "restaurants"
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str]
     description: Mapped[str]
@@ -23,6 +20,8 @@ class Restaurant(db.Model):
     isOpen: Mapped[bool]
     address: Mapped[str]
     menus: Mapped[List["Menu"]] = relationship(back_populates="restaurant")
+    manager: Mapped["User"] = relationship(back_populates="restaurant")
+    manager_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
 
     def __repr__(self) -> str:
         return f"Name:{self.name}, Address: {self.address}"
@@ -36,12 +35,33 @@ class Menu(db.Model):
     price: Mapped[float]
     category: Mapped[str]
     image: Mapped[str]
-    restaurant_id = mapped_column(ForeignKey("restaurant.id"))
     available: Mapped[bool]
+    restaurant_id = mapped_column(ForeignKey("restaurants.id"))
     restaurant: Mapped["Restaurant"] = relationship(back_populates="menus")
 
     def __repr__(self) -> str:
         return f"Name:{self.name}, from restaurant: {self.price}"
+
+
+class Order(db.Model, SerializerMixin):
+    __tablename__ = "orders"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    items: Mapped[JSON] = mapped_column(type_=JSON, nullable=False)
+    # restaurant_id: Mapped[int]
+    # customer_id: Mapped[int]
+    status: Mapped[str]
+    restaurant_id = mapped_column(ForeignKey("restaurants.id"))
+    customer_id = mapped_column(ForeignKey("users.id"))
+    restaurant: Mapped[str]
+    # TODO:Maybe changing the user to restaurant and customer with the relationship
+    user: Mapped["User"] = relationship(back_populates="orders")
+
+    # created_date: Mapped[datetime.datetime] = mapped_column(
+    #     DateTime(timezone=True), server_default=func.now()
+    # )
+
+    def __repr__(self) -> str:
+        return f"Id:{self.id}, from restaurant: {self.restaurant_id}"
 
 
 class User(UserMixin, db.Model):
@@ -52,6 +72,8 @@ class User(UserMixin, db.Model):
     password: Mapped[str]
     role: Mapped[str]
     address: Mapped[str]
-    # createdOn: Mapped[Date]
+    orders: Mapped[List["Order"]] = relationship(back_populates="user")
+    restaurant: Mapped["Restaurant"] = relationship(back_populates="manager")
+    # createdOn: Mapped[DateTime]
     # self.created_on = datetime.now()
     # created_on = db.Column(db.DateTime, nullable=False)

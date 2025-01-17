@@ -1,5 +1,5 @@
 from app.extensions import db
-from app.models.models import Restaurant, Menu
+from app.models.models import Restaurant, Menu, User
 
 
 def bool_convertion(word):
@@ -25,6 +25,13 @@ def populate_database():
             isOpen=bool_convertion(restaurant_data["isOpen"]),
             address=restaurant_data["address"],
             menus=[],
+            manager=User(
+                email=users_data[0]["email"],
+                password=users_data[0]["password"],
+                address=users_data[0]["address"],
+                role=users_data[0]["role"],
+                name=users_data[0]["name"],
+            ),
         )
 
         # Add menu items
@@ -40,11 +47,39 @@ def populate_database():
             )
             db.session.add(menu_item)
             restaurant.menus.append(menu_item)
+        # adding session add(user) not necissery now
         db.session.add(restaurant)
+
+        # for user in users_data:
+        new_user = User(
+            email=users_data[1]["email"],
+            password=users_data[1]["password"],
+            address=users_data[1]["address"],
+            role=users_data[1]["role"],
+            name=users_data[1]["name"],
+        )
+        db.session.add(new_user)
 
     db.session.commit()
     print("Database populated successfully!")
 
+
+users_data = [
+    {
+        "email": "admin1@example.com",
+        "password": "123",
+        "address": "houria 2 ,670",
+        "role": "restaurant",
+        "name": "admin",
+    },
+    {
+        "email": "admin2@example.com",
+        "password": "123",
+        "address": "houria 2 ,670",
+        "role": "customer",
+        "name": "zzz",
+    },
+]
 
 mock_data = [
     {

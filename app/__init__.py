@@ -1,15 +1,14 @@
 from flask import Flask
 from flask_login import LoginManager
-from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.orm import DeclarativeBase
 from flask_cors import CORS
 
 from app.extensions import db
+from config import Config
+from app.models.models import User
+from population import populate_database
 from app.auth import auth_bp
 from app.restaurants import restaurants_bp
-from config import Config
-from population import populate_database
-from app.models.models import User
+from app.orders import orders_bp
 
 
 def create_app(config_class=Config):
@@ -35,6 +34,7 @@ def create_app(config_class=Config):
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(restaurants_bp)
+    app.register_blueprint(orders_bp)
 
     # Important to manage the sessions for users
     @login_manager.user_loader

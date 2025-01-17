@@ -7,9 +7,9 @@ from population import bool_convertion
 restaurants_bp = Blueprint("restaurants", __name__)
 
 
-@restaurants_bp.route("/test", methods=["GET"])
-def test():
-    return "Done"
+# @restaurants_bp.route("/test", methods=["GET"])
+# def test():
+#     return "Done"
 
 
 @restaurants_bp.route("/restaurants", methods=["GET", "POST"])
@@ -36,7 +36,7 @@ def restaurants_list():
 
     restaurants = db.session.execute(db.select(Restaurant)).scalars().fetchall()
 
-    print("menus", (restaurants[0].menus))
+    # print("menus", (restaurants[0].menus))
     if restaurants is not None:
         restaurant_list = [
             {
@@ -60,15 +60,15 @@ def restaurants_list():
     return jsonify(restaurant_list)
 
 
-@restaurants_bp.route("/restaurants/create", methods=["POST"])
-def create_restaurant():
-    data = request.get_json()
-    print(type(data))
-    restaurant = Restaurant(name=data["name"], address=data["address"])
-
-    db.session.add(restaurant)
-    db.session.commit()
-    return "Done"
+# @restaurants_bp.route("/restaurants/create", methods=["POST"])
+# def create_restaurant():
+#     data = request.get_json()
+#     print(type(data))
+#     restaurant = Restaurant(name=data["name"], address=data["address"])
+#
+#     db.session.add(restaurant)
+#     db.session.commit()
+#     return "Done"
 
 
 @restaurants_bp.route("/restaurants/<int:id>")
@@ -121,8 +121,8 @@ def delete_restaurant(id):
 @restaurants_bp.route("/menu/<int:id>")
 def get_menus(id):
     restaurant = db.get_or_404(Restaurant, id)
-    print(type(bool_convertion(restaurant.menus[0].available)))
-    print(bool_convertion(restaurant.menus[0].available))
+    # print(type(bool_convertion(restaurant.menus[0].available)))
+    # print(bool_convertion(restaurant.menus[0].available))
     if restaurant.menus is not None:
         menu_list = [
             {
@@ -140,3 +140,12 @@ def get_menus(id):
         menu_list = []
 
     return jsonify(menu_list)
+
+
+@restaurants_bp.route("/test")
+def res_test():
+    rest = db.session.execute(
+        db.select(Restaurant).where(Restaurant.menus.any(Menu.id == 3))
+    ).first()
+    print(rest)
+    return "Done"
