@@ -9,6 +9,7 @@ from population import populate_database
 from app.auth import auth_bp
 from app.restaurants import restaurants_bp
 from app.orders import orders_bp
+from app.menus import menus_bp
 
 
 def create_app(config_class=Config):
@@ -35,6 +36,7 @@ def create_app(config_class=Config):
     app.register_blueprint(auth_bp)
     app.register_blueprint(restaurants_bp)
     app.register_blueprint(orders_bp)
+    app.register_blueprint(menus_bp)
 
     # Important to manage the sessions for users
     @login_manager.user_loader

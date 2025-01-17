@@ -118,30 +118,6 @@ def delete_restaurant(id):
     return "Delete Done."
 
 
-@restaurants_bp.route("/menu/<int:id>")
-def get_menus(id):
-    restaurant = db.get_or_404(Restaurant, id)
-    # print(type(bool_convertion(restaurant.menus[0].available)))
-    # print(bool_convertion(restaurant.menus[0].available))
-    if restaurant.menus is not None:
-        menu_list = [
-            {
-                "id": menu.id,
-                "name": menu.name,
-                "description": menu.description,
-                "image": menu.image,
-                "category": menu.category,
-                "price": menu.price,
-                "available": menu.available,
-            }
-            for menu in restaurant.menus
-        ]
-    else:
-        menu_list = []
-
-    return jsonify(menu_list)
-
-
 @restaurants_bp.route("/test")
 def res_test():
     rest = db.session.execute(

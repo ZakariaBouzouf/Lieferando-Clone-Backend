@@ -7,7 +7,7 @@ from app.extensions import db
 from sqlalchemy_serializer import SerializerMixin
 
 
-class Restaurant(db.Model):
+class Restaurant(db.Model, SerializerMixin):
     __tablename__ = "restaurants"
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str]
@@ -27,8 +27,8 @@ class Restaurant(db.Model):
         return f"Name:{self.name}, Address: {self.address}"
 
 
-class Menu(db.Model):
-    __tablename__ = "menu"
+class Menu(db.Model, SerializerMixin):
+    __tablename__ = "menus"
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str]
     description: Mapped[str]
@@ -64,7 +64,7 @@ class Order(db.Model, SerializerMixin):
         return f"Id:{self.id}, from restaurant: {self.restaurant_id}"
 
 
-class User(UserMixin, db.Model):
+class User(UserMixin, db.Model, SerializerMixin):
     __tablename__ = "users"
     id: Mapped[int] = mapped_column(primary_key=True)
     email: Mapped[str]
