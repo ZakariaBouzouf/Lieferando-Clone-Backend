@@ -108,6 +108,23 @@ def get_restaurant(id):
     return jsonify(rest)
 
 
+@restaurants_bp.route("/restaurants/<int:id>", methods=["PUT"])
+def update_restaurant(id):
+    data = request.get_json()
+    db.session.execute(
+        db.update(Restaurant)
+        .where(Restaurant.id == id)
+        .values(
+            name=data["name"],
+            image=data["image"],
+            description=data["description"],
+            isOpen=data["isOpen"],
+        )
+    )
+    db.session.commit()
+    return "Restaurant updated"
+
+
 @restaurants_bp.route("/restaurants/<int:id>", methods=["DELETE"])
 @login_required
 def delete_restaurant(id):
