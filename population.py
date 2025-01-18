@@ -12,53 +12,107 @@ def bool_convertion(word):
 
 
 def populate_database():
-    for restaurant_data in mock_data:
-        # Create a Restaurant object
-        restaurant = Restaurant(
-            name=restaurant_data["name"],
-            description=restaurant_data["description"],
-            image=restaurant_data["image"],
-            cuisine=restaurant_data["cuisine"],
-            rating=restaurant_data["rating"],
-            deliveryFee=restaurant_data["deliveryFee"],
-            minOrder=restaurant_data["minOrder"],
-            isOpen=bool_convertion(restaurant_data["isOpen"]),
-            address=restaurant_data["address"],
-            menus=[],
-            manager=User(
-                email=users_data[0]["email"],
-                password=users_data[0]["password"],
-                address=users_data[0]["address"],
-                role=users_data[0]["role"],
-                name=users_data[0]["name"],
-            ),
-        )
+    # for restaurant_data in mock_data:
+    # Create a Restaurant object
+    admin = User(
+        email="admin1@example.com",
+        password="123",
+        address="Lieferspatz 123",
+        role="admin",
+        name="Lieferspatz",
+        balance=0,
+    )
+    db.session.add(admin)
+    restaurant1 = Restaurant(
+        name=mock_data[0]["name"],
+        description=mock_data[0]["description"],
+        image=mock_data[0]["image"],
+        cuisine=mock_data[0]["cuisine"],
+        rating=mock_data[0]["rating"],
+        deliveryFee=mock_data[0]["deliveryFee"],
+        minOrder=mock_data[0]["minOrder"],
+        isOpen=bool_convertion(mock_data[0]["isOpen"]),
+        address=mock_data[0]["address"],
+        menus=[],
+        manager=User(
+            email=users_data[0]["email"],
+            password=users_data[0]["password"],
+            address=users_data[0]["address"],
+            role=users_data[0]["role"],
+            name=users_data[0]["name"],
+            balance=users_data[0]["balance"],
+        ),
+    )
+    restaurant2 = Restaurant(
+        name=mock_data[2]["name"],
+        description=mock_data[2]["description"],
+        image=mock_data[2]["image"],
+        cuisine=mock_data[2]["cuisine"],
+        rating=mock_data[2]["rating"],
+        deliveryFee=mock_data[2]["deliveryFee"],
+        minOrder=mock_data[2]["minOrder"],
+        isOpen=bool_convertion(mock_data[2]["isOpen"]),
+        address=mock_data[2]["address"],
+        menus=[],
+        manager=User(
+            email=users_data[2]["email"],
+            password=users_data[2]["password"],
+            address=users_data[2]["address"],
+            role=users_data[2]["role"],
+            name=users_data[2]["name"],
+            balance=users_data[2]["balance"],
+        ),
+    )
 
-        # Add menu items
-        for menu_data in restaurant_data["menu"]:
-            menu_item = Menu(
-                name=menu_data["name"],
-                description=menu_data["description"],
-                price=menu_data["price"],
-                category=menu_data["category"],
-                image=menu_data["image"],
-                available=bool_convertion(menu_data["available"]),
-                restaurant_id=restaurant.id,
-            )
-            db.session.add(menu_item)
-            restaurant.menus.append(menu_item)
-        # adding session add(user) not necissery now
-        db.session.add(restaurant)
+    # Add menu items
+    # for menu_data in restaurant_data["menu"]:
+    menu_i = mock_data[0]["menu"][0]
+    menu_item = Menu(
+        name=menu_i["name"],
+        description=mock_data[0]["menu"][0]["description"],
+        price=mock_data[0]["menu"][0]["price"],
+        category=mock_data[0]["menu"][0]["category"],
+        image=mock_data[0]["menu"][0]["image"],
+        available=bool_convertion(mock_data[0]["menu"][0]["available"]),
+        restaurant_id=restaurant1.id,
+    )
+    db.session.add(menu_item)
+    restaurant1.menus.append(menu_item)
 
-        # for user in users_data:
-        new_user = User(
-            email=users_data[1]["email"],
-            password=users_data[1]["password"],
-            address=users_data[1]["address"],
-            role=users_data[1]["role"],
-            name=users_data[1]["name"],
-        )
-        db.session.add(new_user)
+    menu_item2 = Menu(
+        name=mock_data[1]["menu"][0]["name"],
+        description=mock_data[1]["menu"][0]["description"],
+        price=mock_data[1]["menu"][0]["price"],
+        category=mock_data[1]["menu"][0]["category"],
+        image=mock_data[1]["menu"][0]["image"],
+        available=bool_convertion(mock_data[1]["menu"][0]["available"]),
+        restaurant_id=restaurant1.id,
+    )
+    db.session.add(menu_item2)
+    restaurant2.menus.append(menu_item2)
+    # adding session add(user) not necissery now
+    db.session.add(restaurant1)
+    db.session.add(restaurant2)
+
+    # for user in users_data:
+    new_user1 = User(
+        email=users_data[1]["email"],
+        password=users_data[1]["password"],
+        address=users_data[1]["address"],
+        role=users_data[1]["role"],
+        name=users_data[1]["name"],
+        balance=100,
+    )
+    # new_user2 = User(
+    #     email=users_data[1]["email"],
+    #     password=users_data[1]["password"],
+    #     address=users_data[1]["address"],
+    #     role=users_data[1]["role"],
+    #     name=users_data[1]["name"],
+    #     balance=100,
+    # )
+    db.session.add(new_user1)
+    # db.session.add(new_user2)
 
     db.session.commit()
     print("Database populated successfully!")
@@ -66,24 +120,34 @@ def populate_database():
 
 users_data = [
     {
-        "email": "admin1@example.com",
+        "email": "restau1@example.com",
         "password": "123",
         "address": "houria 2 ,670",
         "role": "restaurant",
-        "name": "admin",
+        "name": "James",
+        "balance": 0,
     },
     {
-        "email": "admin2@example.com",
+        "email": "customer1@example.com",
         "password": "123",
         "address": "houria 2 ,670",
         "role": "customer",
-        "name": "zzz",
+        "name": "Harry",
+        "balance": 100,
+    },
+    {
+        "email": "restau2@example.com",
+        "password": "123",
+        "address": "houria 2 ,670",
+        "role": "restaurant",
+        "name": "Elise",
+        "balance": 0,
     },
 ]
 
 mock_data = [
     {
-        "id": "1",
+        # "id": "1",
         "name": "Pizza Paradise",
         "description": "Authentic Italian pizzas and pasta",
         "image": "https://images.unsplash.com/photo-1604382354936-07c5d9983bd3",
@@ -95,7 +159,7 @@ mock_data = [
         "address": "123 Main St",
         "menu": [
             {
-                "id": "1-1",
+                # "id": "1-1",
                 "name": "Margherita Pizza",
                 "description": "Fresh tomatoes, mozzarella, basil",
                 "price": 14.99,
@@ -104,7 +168,7 @@ mock_data = [
                 "available": "true",
             },
             {
-                "id": "1-2",
+                # "id": "1-2",
                 "name": "Pepperoni Pizza",
                 "description": "Classic pepperoni with extra cheese",
                 "price": 16.99,
@@ -113,7 +177,7 @@ mock_data = [
                 "available": "true",
             },
             {
-                "id": "1-3",
+                # "id": "1-3",
                 "name": "Spaghetti Carbonara",
                 "description": "Creamy pasta with pancetta",
                 "price": 13.99,
@@ -122,7 +186,7 @@ mock_data = [
                 "available": "true",
             },
             {
-                "id": "1-4",
+                # "id": "1-4",
                 "name": "Garlic Bread",
                 "description": "Toasted bread with garlic butter",
                 "price": 4.99,
@@ -131,7 +195,7 @@ mock_data = [
                 "available": "true",
             },
             {
-                "id": "1-5",
+                # "id": "1-5",
                 "name": "Tiramisu",
                 "description": "Classic Italian dessert",
                 "price": 6.99,
@@ -142,7 +206,7 @@ mock_data = [
         ],
     },
     {
-        "id": "2",
+        # "id": "2",
         "name": "Sushi Master",
         "description": "Premium Japanese cuisine",
         "image": "https://images.unsplash.com/photo-1579871494447-9811cf80d66c",
@@ -154,7 +218,7 @@ mock_data = [
         "address": "456 Oak St",
         "menu": [
             {
-                "id": "2-1",
+                # "id": "2-1",
                 "name": "California Roll",
                 "description": "Crab, avocado, cucumber",
                 "price": 12.99,
@@ -163,7 +227,7 @@ mock_data = [
                 "available": "true",
             },
             {
-                "id": "2-2",
+                # "id": "2-2",
                 "name": "Salmon Nigiri",
                 "description": "Fresh salmon over rice",
                 "price": 8.99,
@@ -172,7 +236,7 @@ mock_data = [
                 "available": "true",
             },
             {
-                "id": "2-3",
+                # "id": "2-3",
                 "name": "Tempura Udon",
                 "description": "Thick noodles in hot broth",
                 "price": 15.99,
@@ -181,7 +245,7 @@ mock_data = [
                 "available": "true",
             },
             {
-                "id": "2-4",
+                # "id": "2-4",
                 "name": "Miso Soup",
                 "description": "Traditional Japanese soup",
                 "price": 3.99,
@@ -190,7 +254,7 @@ mock_data = [
                 "available": "true",
             },
             {
-                "id": "2-5",
+                # "id": "2-5",
                 "name": "Green Tea Ice Cream",
                 "description": "Matcha flavored ice cream",
                 "price": 5.99,

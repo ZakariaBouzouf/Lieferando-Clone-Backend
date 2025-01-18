@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request
+from flask_login import current_user
 from app.extensions import db
-from app.models.models import Order
+from app.models.models import Order, Restaurant
 
 orders_bp = Blueprint("orders", __name__)
 
@@ -27,7 +28,8 @@ def customer_order(id):
                     "items",
                     "restaurant_id",
                     "customer_id",
-                    "restaurant",
+                    "restaurant_name",
+                    "total",
                     # "created_date",
                 )
             ),
@@ -57,7 +59,7 @@ def restaurant_order(id):
                     "items",
                     "restaurant_id",
                     "customer_id",
-                    "restaurant",
+                    "total",
                     # "created_date",
                 )
             ),
@@ -80,10 +82,13 @@ def add_order():
             restaurant_id=data["restaurant_id"],
             customer_id=data["customer_id"],
             status=data["status"],
-            restaurant=data["restaurant"],
-            # created_date=data["created_date"],
+            restaurant_name=data["restaurant_name"],
+            total=data["total"],
         )
         db.session.add(order)
+        current_user.balance = current_user.balance - data["total"]
+        restaurant = db.get_or_404(Restaurant, data["restaurant_id"])
+        restaurant.manager.balance = restaurant.manager.balance + data["total"]
         db.session.commit()
 
         return "Adding done"

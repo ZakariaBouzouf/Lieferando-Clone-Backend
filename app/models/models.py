@@ -47,18 +47,13 @@ class Order(db.Model, SerializerMixin):
     __tablename__ = "orders"
     id: Mapped[int] = mapped_column(primary_key=True)
     items: Mapped[JSON] = mapped_column(type_=JSON, nullable=False)
-    # restaurant_id: Mapped[int]
-    # customer_id: Mapped[int]
     status: Mapped[str]
     restaurant_id = mapped_column(ForeignKey("restaurants.id"))
     customer_id = mapped_column(ForeignKey("users.id"))
-    restaurant: Mapped[str]
+    restaurant_name: Mapped[str]
+    total: Mapped[float]
     # TODO:Maybe changing the user to restaurant and customer with the relationship
     user: Mapped["User"] = relationship(back_populates="orders")
-
-    # created_date: Mapped[datetime.datetime] = mapped_column(
-    #     DateTime(timezone=True), server_default=func.now()
-    # )
 
     def __repr__(self) -> str:
         return f"Id:{self.id}, from restaurant: {self.restaurant_id}"
@@ -72,6 +67,7 @@ class User(UserMixin, db.Model, SerializerMixin):
     password: Mapped[str]
     role: Mapped[str]
     address: Mapped[str]
+    balance: Mapped[float]
     orders: Mapped[List["Order"]] = relationship(back_populates="user")
     restaurant: Mapped["Restaurant"] = relationship(back_populates="manager")
     # createdOn: Mapped[DateTime]
