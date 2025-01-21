@@ -138,7 +138,7 @@ users_data = [
         "role": "customer",
         "name": "Harry",
         "balance": 100,
-        "zipCode": 122,
+        "zipCode": 123,
     },
     {
         "email": "restau2@example.com",
@@ -222,7 +222,7 @@ mock_data = [
         "minOrder": 20,
         "isOpen": "true",
         "address": "456 Oak St",
-        "zipCodes": ["123", "124"],
+        "zipCodes": ["122", "124"],
         "menu": [
             {
                 # "id": "2-1",

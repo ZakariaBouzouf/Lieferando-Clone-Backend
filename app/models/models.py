@@ -73,6 +73,3 @@ class User(UserMixin, db.Model, SerializerMixin):
     balance: Mapped[float]
     orders: Mapped[List["Order"]] = relationship(back_populates="user")
     restaurant: Mapped["Restaurant"] = relationship(back_populates="manager")
-    # createdOn: Mapped[DateTime]
-    # self.created_on = datetime.now()
-    # created_on = db.Column(db.DateTime, nullable=False)

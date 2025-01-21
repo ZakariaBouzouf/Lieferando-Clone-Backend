@@ -19,6 +19,7 @@ def register():
         password=data["password"],
         role=data["role"],
         address=data["address"],
+        zipCode=data["zipCode"],
     )
     if data["role"] == "customer":
         new_user.balance = 100
@@ -84,6 +85,7 @@ def login():
                         "role": user.role,
                         "name": user.name,
                         "balance": user.balance,
+                        "address": user.address,
                         "zipCode": user.zipCode,
                     }
                 ),
@@ -130,10 +132,26 @@ def get_session():
                 "balance": current_user.balance,
                 "name": current_user.name,
                 "zipCode": current_user.zipCode,
+                "address": current_user.address,
             }
         ),
         200,
     )
+
+
+@auth_bp.route("/update/<int:id>", methods=["PUT"])
+def update_account(id):
+    data = request.get_json()
+    db.session.execute(
+        db.update(User)
+        .where(User.id == id)
+        .values(name=data["name"], address=data["address"], zipCode=data["zipCode"])
+    )
+    db.session.commit()
+    user = db.get_or_404(User, id)
+
+    # Don't send the password back in a real application
+    return jsonify(user.to_dict()), 200
 
 
 @auth_bp.route("/balance_check", methods=["POST"])
