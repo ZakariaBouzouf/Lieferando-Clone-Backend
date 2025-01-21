@@ -21,6 +21,7 @@ def populate_database():
         role="admin",
         name="Lieferspatz",
         balance=0,
+        zipCode=1223,
     )
     db.session.add(admin)
     restaurant1 = Restaurant(
@@ -34,6 +35,7 @@ def populate_database():
         isOpen=bool_convertion(mock_data[0]["isOpen"]),
         address=mock_data[0]["address"],
         menus=[],
+        zipCodes=mock_data[0]["zipCodes"],
         manager=User(
             email=users_data[0]["email"],
             password=users_data[0]["password"],
@@ -53,6 +55,7 @@ def populate_database():
         minOrder=mock_data[2]["minOrder"],
         isOpen=bool_convertion(mock_data[2]["isOpen"]),
         address=mock_data[2]["address"],
+        zipCodes=mock_data[1]["zipCodes"],
         menus=[],
         manager=User(
             email=users_data[2]["email"],
@@ -101,6 +104,7 @@ def populate_database():
         address=users_data[1]["address"],
         role=users_data[1]["role"],
         name=users_data[1]["name"],
+        zipCode=users_data[1]["zipCode"],
         balance=100,
     )
     # new_user2 = User(
@@ -134,6 +138,7 @@ users_data = [
         "role": "customer",
         "name": "Harry",
         "balance": 100,
+        "zipCode": 122,
     },
     {
         "email": "restau2@example.com",
@@ -157,6 +162,7 @@ mock_data = [
         "minOrder": 15,
         "isOpen": "true",
         "address": "123 Main St",
+        "zipCodes": ["123", "124"],
         "menu": [
             {
                 # "id": "1-1",
@@ -216,6 +222,7 @@ mock_data = [
         "minOrder": 20,
         "isOpen": "true",
         "address": "456 Oak St",
+        "zipCodes": ["123", "124"],
         "menu": [
             {
                 # "id": "2-1",

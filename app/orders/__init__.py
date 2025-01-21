@@ -1,7 +1,10 @@
+from datetime import datetime
 from flask import Blueprint, jsonify, request
 from flask_login import current_user
+
+# from sqlalchemy.sql.functions import user
 from app.extensions import db
-from app.models.models import Order, Restaurant
+from app.models.models import Order, Restaurant, User
 
 orders_bp = Blueprint("orders", __name__)
 
@@ -30,6 +33,7 @@ def customer_order(id):
                     "customer_id",
                     "restaurant_name",
                     "total",
+                    "datetime_added",
                     # "created_date",
                 )
             ),
@@ -50,6 +54,11 @@ def restaurant_order(id):
         .scalars()
         .fetchall()
     )
+    for order in orders:
+        user = db.get_or_404(User, order.customer_id)
+        order.customer_name = user.name
+        order.address = user.address
+        order.zipCode = user.zipCode
     result = list(
         map(
             lambda x: x.to_dict(
@@ -60,7 +69,10 @@ def restaurant_order(id):
                     "restaurant_id",
                     "customer_id",
                     "total",
-                    # "created_date",
+                    "datetime_added",
+                    "customer_name",
+                    "address",
+                    "zipCode",
                 )
             ),
             orders,
@@ -84,6 +96,7 @@ def add_order():
             status=data["status"],
             restaurant_name=data["restaurant_name"],
             total=data["total"],
+            datetime_added=datetime.now(),
         )
         db.session.add(order)
         current_user.balance = current_user.balance - data["total"]

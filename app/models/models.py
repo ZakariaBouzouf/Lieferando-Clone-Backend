@@ -1,8 +1,8 @@
+from typing import List
 from flask_login import UserMixin
 from flask_login.login_manager import datetime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import JSON, Date, DateTime, ForeignKey
-from typing import List
+from sqlalchemy import JSON, DateTime, ForeignKey
 from app.extensions import db
 from sqlalchemy_serializer import SerializerMixin
 
@@ -19,6 +19,7 @@ class Restaurant(db.Model, SerializerMixin):
     minOrder: Mapped[int]
     isOpen: Mapped[bool]
     address: Mapped[str]
+    zipCodes: Mapped[JSON] = mapped_column(type_=JSON, nullable=False)
     menus: Mapped[List["Menu"]] = relationship(back_populates="restaurant")
     manager: Mapped["User"] = relationship(back_populates="restaurant")
     manager_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
@@ -54,6 +55,7 @@ class Order(db.Model, SerializerMixin):
     total: Mapped[float]
     # TODO:Maybe changing the user to restaurant and customer with the relationship
     user: Mapped["User"] = relationship(back_populates="orders")
+    datetime_added: Mapped[datetime] = mapped_column(DateTime)
 
     def __repr__(self) -> str:
         return f"Id:{self.id}, from restaurant: {self.restaurant_id}"
@@ -67,6 +69,7 @@ class User(UserMixin, db.Model, SerializerMixin):
     password: Mapped[str]
     role: Mapped[str]
     address: Mapped[str]
+    zipCode: Mapped[int] = mapped_column(nullable=True)
     balance: Mapped[float]
     orders: Mapped[List["Order"]] = relationship(back_populates="user")
     restaurant: Mapped["Restaurant"] = relationship(back_populates="manager")

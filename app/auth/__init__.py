@@ -36,6 +36,7 @@ def register():
             rating=0,
             menus=[],
             manager=new_user,
+            zipCodes=data["zipCodes"],
         )
         db.session.add(restaurant)
         # new_user.restaurant(restaurant)
@@ -83,6 +84,7 @@ def login():
                         "role": user.role,
                         "name": user.name,
                         "balance": user.balance,
+                        "zipCode": user.zipCode,
                     }
                 ),
                 200,
@@ -127,6 +129,7 @@ def get_session():
                 "role": current_user.role,
                 "balance": current_user.balance,
                 "name": current_user.name,
+                "zipCode": current_user.zipCode,
             }
         ),
         200,
@@ -136,6 +139,7 @@ def get_session():
 @auth_bp.route("/balance_check", methods=["POST"])
 def check_balance():
     total = request.get_json()["total"]
+    print(total, current_user.balance)
     if current_user.balance >= total:
         return jsonify({"message": "Enough"}), 200
     return jsonify({"message": "Not enough"}), 400

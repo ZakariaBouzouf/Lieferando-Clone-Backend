@@ -27,6 +27,7 @@ def restaurants_list():
             minOrder=data["minOrder"],
             isOpen=bool_convertion(data["isOpen"]),
             address=data["address"],
+            zipCodes=data["zipCodes"],
             menus=[],
         )
 
@@ -50,6 +51,7 @@ def restaurants_list():
                 "minOrder": restaurant.minOrder,
                 "isOpen": restaurant.isOpen,
                 "address": restaurant.address,
+                "zipCodes": restaurant.zipCodes,
                 # "menus": jsonify(restaurant.menus),
             }
             for restaurant in restaurants
