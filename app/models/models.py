@@ -56,6 +56,7 @@ class Order(db.Model, SerializerMixin):
     # TODO:Maybe changing the user to restaurant and customer with the relationship
     user: Mapped["User"] = relationship(back_populates="orders")
     datetime_added: Mapped[datetime] = mapped_column(DateTime)
+    note: Mapped[str]
 
     def __repr__(self) -> str:
         return f"Id:{self.id}, from restaurant: {self.restaurant_id}"

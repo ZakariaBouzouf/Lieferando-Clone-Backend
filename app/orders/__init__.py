@@ -73,6 +73,7 @@ def restaurant_order(id):
                     "customer_name",
                     "address",
                     "zipCode",
+                    "note",
                 )
             ),
             orders,
@@ -97,6 +98,7 @@ def add_order():
             restaurant_name=data["restaurant_name"],
             total=data["total"],
             datetime_added=datetime.now(),
+            note=data["note"],
         )
         db.session.add(order)
         current_user.balance = current_user.balance - data["total"]
