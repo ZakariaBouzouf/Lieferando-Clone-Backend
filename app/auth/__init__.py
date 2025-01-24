@@ -1,9 +1,9 @@
-from flask import Blueprint, redirect, request, jsonify
+from flask import Blueprint, request, jsonify
 from flask_login import current_user, login_required, login_user, logout_user
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from app.extensions import db
 from population import bool_convertion
-from app.models.models import Restaurant, User
+from app.models.models import Address, Restaurant, User
 
 # Create a Blueprint for login
 auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
@@ -18,8 +18,10 @@ def register():
         name=data["name"],
         password=data["password"],
         role=data["role"],
-        address=data["address"],
-        zipCode=data["zipCode"],
+        address=Address(
+            street=data["address"]["street"],
+            zipCode=data["address"]["zipCode"],
+        ),
     )
     if data["role"] == "customer":
         new_user.balance = 100
@@ -32,7 +34,6 @@ def register():
             cuisine=data["cuisine"],
             minOrder=data["minOrder"],
             isOpen=bool_convertion(data["isOpen"]),
-            address=data["address"],
             deliveryFee=data["deliveryFee"],
             rating=0,
             menus=[],
@@ -85,8 +86,8 @@ def login():
                         "role": user.role,
                         "name": user.name,
                         "balance": user.balance,
-                        "address": user.address,
-                        "zipCode": user.zipCode,
+                        "street": user.address.street,
+                        "zipCode": user.address.zipCode,
                     }
                 ),
                 200,
@@ -122,6 +123,10 @@ def get_session():
             ),
             200,
         )
+    address = db.session.execute(
+        db.select(Address).where(Address.user_id == current_user.id)
+    ).scalars()
+    print(address)
 
     return (
         jsonify(
@@ -131,27 +136,34 @@ def get_session():
                 "role": current_user.role,
                 "balance": current_user.balance,
                 "name": current_user.name,
-                "zipCode": current_user.zipCode,
-                "address": current_user.address,
+                "zipCode": current_user.address.zipCode,
+                "street": current_user.address.street,
             }
         ),
         200,
     )
 
 
-@auth_bp.route("/update/<int:id>", methods=["PUT"])
-def update_account(id):
+@auth_bp.route("/update/<int:userId>", methods=["PUT"])
+def update_account(userId):
     data = request.get_json()
     db.session.execute(
-        db.update(User)
-        .where(User.id == id)
-        .values(name=data["name"], address=data["address"], zipCode=data["zipCode"])
+        db.update(User).where(User.id == userId).values(name=data["name"])
+    )
+    db.session.execute(
+        db.update(Address)
+        .where(Address.user_id == userId)
+        .values(street=data["street"], zipCode=data["zipCode"])
     )
     db.session.commit()
-    user = db.get_or_404(User, id)
 
     # Don't send the password back in a real application
-    return jsonify(user.to_dict()), 200
+    return (
+        jsonify(
+            {"name": data["name"], "street": data["street"], "zipCode": data["zipCode"]}
+        ),
+        200,
+    )
 
 
 @auth_bp.route("/balance_check", methods=["POST"])

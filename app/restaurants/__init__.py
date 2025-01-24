@@ -26,7 +26,7 @@ def restaurants_list():
             deliveryFee=data["deliveryFee"],
             minOrder=data["minOrder"],
             isOpen=bool_convertion(data["isOpen"]),
-            address=data["address"],
+            # address=data["address"],
             zipCodes=data["zipCodes"],
             menus=[],
         )
@@ -50,7 +50,6 @@ def restaurants_list():
                 "deliveryFee": restaurant.deliveryFee,
                 "minOrder": restaurant.minOrder,
                 "isOpen": restaurant.isOpen,
-                "address": restaurant.address,
                 "zipCodes": restaurant.zipCodes,
                 # "menus": jsonify(restaurant.menus),
             }
@@ -60,17 +59,6 @@ def restaurants_list():
         restaurant_list = []
 
     return jsonify(restaurant_list)
-
-
-# @restaurants_bp.route("/restaurants/create", methods=["POST"])
-# def create_restaurant():
-#     data = request.get_json()
-#     print(type(data))
-#     restaurant = Restaurant(name=data["name"], address=data["address"])
-#
-#     db.session.add(restaurant)
-#     db.session.commit()
-#     return "Done"
 
 
 @restaurants_bp.route("/restaurants/<int:id>")

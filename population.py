@@ -1,5 +1,5 @@
 from app.extensions import db
-from app.models.models import Restaurant, Menu, User
+from app.models.models import Address, Restaurant, Menu, User
 
 
 def bool_convertion(word):
@@ -17,13 +17,22 @@ def populate_database():
     admin = User(
         email="admin1@example.com",
         password="123",
-        address="Lieferspatz 123",
         role="admin",
         name="Lieferspatz",
         balance=0,
-        zipCode=1223,
     )
+    address = Address(
+        street="Lieferspatz 123",
+        zipCode=123,
+    )
+    address2 = Address(
+        street="Lieferspatz 321",
+        zipCode=123,
+    )
+    admin.address = address
+    # db.session.add(address)
     db.session.add(admin)
+
     restaurant1 = Restaurant(
         name=mock_data[0]["name"],
         description=mock_data[0]["description"],
@@ -33,18 +42,18 @@ def populate_database():
         deliveryFee=mock_data[0]["deliveryFee"],
         minOrder=mock_data[0]["minOrder"],
         isOpen=bool_convertion(mock_data[0]["isOpen"]),
-        address=mock_data[0]["address"],
+        # street=mock_data[0]["street"],
         menus=[],
         zipCodes=mock_data[0]["zipCodes"],
         manager=User(
             email=users_data[0]["email"],
             password=users_data[0]["password"],
-            address=users_data[0]["address"],
             role=users_data[0]["role"],
             name=users_data[0]["name"],
             balance=users_data[0]["balance"],
         ),
     )
+    restaurant1.manager.address = address
     restaurant2 = Restaurant(
         name=mock_data[2]["name"],
         description=mock_data[2]["description"],
@@ -54,19 +63,19 @@ def populate_database():
         deliveryFee=mock_data[2]["deliveryFee"],
         minOrder=mock_data[2]["minOrder"],
         isOpen=bool_convertion(mock_data[2]["isOpen"]),
-        address=mock_data[2]["address"],
+        # street=mock_data[2]["street"],
         zipCodes=mock_data[1]["zipCodes"],
         menus=[],
         manager=User(
             email=users_data[2]["email"],
             password=users_data[2]["password"],
-            address=users_data[2]["address"],
             role=users_data[2]["role"],
             name=users_data[2]["name"],
             balance=users_data[2]["balance"],
+            address=address2,
         ),
     )
-
+    # restaurant2.manager.address = address2
     # Add menu items
     # for menu_data in restaurant_data["menu"]:
     menu_i = mock_data[0]["menu"][0]
@@ -93,7 +102,7 @@ def populate_database():
     )
     db.session.add(menu_item2)
     restaurant2.menus.append(menu_item2)
-    # adding session add(user) not necissery now
+    # adding session add(user) not necessary now
     db.session.add(restaurant1)
     db.session.add(restaurant2)
 
@@ -101,11 +110,15 @@ def populate_database():
     new_user1 = User(
         email=users_data[1]["email"],
         password=users_data[1]["password"],
-        address=users_data[1]["address"],
         role=users_data[1]["role"],
         name=users_data[1]["name"],
-        zipCode=users_data[1]["zipCode"],
         balance=100,
+        # address=users_data[1]["address"],
+        # zipCode=users_data[1]["zipCode"],
+    )
+    new_user1.address = Address(
+        street="Lieferspatz 123",
+        zipCode=123,
     )
     # new_user2 = User(
     #     email=users_data[1]["email"],
@@ -161,7 +174,7 @@ mock_data = [
         "deliveryFee": 0,
         "minOrder": 15,
         "isOpen": "true",
-        "address": "123 Main St",
+        "street": "123 Main St",
         "zipCodes": ["123", "124"],
         "menu": [
             {
@@ -221,7 +234,7 @@ mock_data = [
         "deliveryFee": 3.5,
         "minOrder": 20,
         "isOpen": "true",
-        "address": "456 Oak St",
+        "street": "456 Oak St",
         "zipCodes": ["122", "124"],
         "menu": [
             {
@@ -281,7 +294,7 @@ mock_data = [
         "deliveryFee": 2.5,
         "minOrder": 15,
         "isOpen": "true",
-        "address": "789 Burger Lane",
+        "street": "789 Burger Lane",
         "menu": [
             {
                 "id": "3-1",

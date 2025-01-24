@@ -4,7 +4,7 @@ from flask_login import current_user
 
 # from sqlalchemy.sql.functions import user
 from app.extensions import db
-from app.models.models import Order, Restaurant, User
+from app.models.models import Address, Order, Restaurant, User
 
 orders_bp = Blueprint("orders", __name__)
 
@@ -54,11 +54,12 @@ def restaurant_order(id):
         .scalars()
         .fetchall()
     )
+    print(orders)
     for order in orders:
-        user = db.get_or_404(User, order.customer_id)
-        order.customer_name = user.name
-        order.address = user.address
-        order.zipCode = user.zipCode
+        order.customer_name = order.user.name
+        address = db.get_or_404(Address, order.address_id)
+        order.street = address.street
+        order.zipCode = address.zipCode
     result = list(
         map(
             lambda x: x.to_dict(
@@ -70,10 +71,10 @@ def restaurant_order(id):
                     "customer_id",
                     "total",
                     "datetime_added",
-                    "customer_name",
-                    "address",
-                    "zipCode",
                     "note",
+                    "customer_name",
+                    "street",
+                    "zipCode",
                 )
             ),
             orders,
@@ -90,6 +91,13 @@ def add_order():
     if request.method == "POST":
         data = request.get_json()
         print(data)
+        address = Address(
+            street=data["street"],
+            zipCode=data["zipCode"],
+        )
+
+        db.session.add(address)
+        db.session.commit()
         order = Order(
             items=data["items"],
             restaurant_id=data["restaurant_id"],
@@ -99,6 +107,7 @@ def add_order():
             total=data["total"],
             datetime_added=datetime.now(),
             note=data["note"],
+            address_id=address.id,
         )
         db.session.add(order)
         current_user.balance = current_user.balance - data["total"]
