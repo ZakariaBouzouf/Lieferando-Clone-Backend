@@ -10,6 +10,7 @@ from app.auth import auth_bp
 from app.restaurants import restaurants_bp
 from app.orders import orders_bp
 from app.menus import menus_bp
+from app.extensions import socketio
 
 
 def create_app(config_class=Config):
@@ -42,5 +43,7 @@ def create_app(config_class=Config):
     @login_manager.user_loader
     def load_user(user_id):
         return User.query.filter_by(id=user_id).first()
+
+    socketio.init_app(app, cors_allowed_origins="*")
 
     return app

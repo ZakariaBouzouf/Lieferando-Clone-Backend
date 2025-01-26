@@ -1,8 +1,8 @@
 from datetime import datetime
 from flask import Blueprint, jsonify, request
 from flask_login import current_user
+from app.extensions import socketio
 
-# from sqlalchemy.sql.functions import user
 from app.extensions import db
 from app.models.models import Address, Order, Restaurant, User
 
@@ -111,14 +111,67 @@ def add_order():
         )
         db.session.add(order)
         current_user.balance = current_user.balance - data["total"]
-        restaurant = db.get_or_404(Restaurant, data["restaurant_id"])
-        restaurant.manager.balance = restaurant.manager.balance + data["total"]
+        # restaurant = db.get_or_404(Restaurant, data["restaurant_id"])
+        # restaurant.manager.balance = restaurant.manager.balance + data["total"]
         db.session.commit()
+
+        socketio.emit(
+            "new_order",
+            {
+                "customer": current_user.name,
+                "total": data["total"],
+                "address": data["street"],
+                "order_id": order.id,
+                "customer_id": data["customer_id"],
+                "restaurant_id": data["restaurant_id"],
+            },
+            namespace="/restaurant_notifications",
+        )
 
         return "Adding done"
     orders = db.session.execute(db.select(Order)).scalars().fetchall()
     print(orders)
     return "Fetching done"
+
+
+@orders_bp.route("/orders/<int:orderId>/accept", methods=["POST"])
+def accept_order(orderId):
+    data = request.get_json()
+    # db.session.execute(
+    #     db.update(Order).where(Order.id == orderId).values(status="accepted")
+    # )
+    order = db.get_or_404(Order, orderId)
+    order.status = "accepted"
+    restaurant = db.get_or_404(Restaurant, data["restaurant_id"])
+    print(type(order.total))
+    restaurant.manager.balance = restaurant.manager.balance + order.total
+    db.session.commit()
+    return "Done"
+
+
+@orders_bp.route("/orders/<int:orderId>/decline", methods=["POST"])
+def decline_order(orderId):
+    data = request.get_json()
+    # db.session.execute(
+    #     db.update(Order).where(Order.id == orderId).values(status="accepted")
+    # )
+    order = db.get_or_404(Order, orderId)
+    order.status = "declined"
+    customer = db.get_or_404(User, data["customer_id"])
+    customer.balance = customer.balance + order.total
+    db.session.commit()
+    return "Done"
+
+
+# WebSocket event handler
+@socketio.on("connect", namespace="/restaurant_notifications")
+def handle_connect():
+    print("Client connected")
+
+
+@socketio.on("disconnect", namespace="/restaurant_notifications")
+def handle_disconnect():
+    print("Client disconnected")
 
 
 @orders_bp.route("/orders/<int:id>", methods=["PUT"])
